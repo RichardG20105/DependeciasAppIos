@@ -1,0 +1,6 @@
+module Pods_DependenciasAPP_DependenciasAPPTests {
+  umbrella header "Pods-DependenciasAPP-DependenciasAPPTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
