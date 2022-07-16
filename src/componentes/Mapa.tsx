@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Marker } from 'react-native-maps'
+import MapView, { Camera, Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { LocalizacionUso } from '../hooks/LocalizacionUso';
 import { Fab } from './Fab';
 import { DependenciaUso } from '../hooks/DependendeciasUso';
@@ -7,7 +7,7 @@ import MapViewDirections, { MapViewDirectionsMode } from 'react-native-maps-dire
 import { GOOGLE_API_KEY } from '../hooks/API_KEY';
 import { Dimensions, Image, Keyboard, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import {Svg} from 'react-native-svg';
-import { BaseURL} from '../api/Apis';
+import {MapJSON, BaseURL} from '../api/Apis';
 import { FlatList, TextInput } from 'react-native-gesture-handler';
 import { getIconoMapa, getColorLetras } from './Iconos';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -32,6 +32,14 @@ export const Mapa = ({navigation}:any) => {
     const {top} = useSafeAreaInsets();
 
     let mapRef = useRef<MapView>(null)
+
+    const CameraInicial: Camera = {
+        center: {latitude: PosicionInicial.latitud, longitude: PosicionInicial.longitud},
+        heading: 100,
+        pitch: 0,
+        zoom: 18,
+        altitude: 2873,
+    }
     
     const [SeguirUsuario, setSeguirUsuario ]= useState<Boolean>(true);
 
@@ -69,6 +77,11 @@ export const Mapa = ({navigation}:any) => {
     const [DistanciaTiempo, setDistanciaTiempo] = useState({
         tiempo: 0,
         distancia: 0,
+    })
+
+    const [UltimoValor, setUltimoValor] = useState({
+        latitude: 0,
+        longitude: 0
     })
     
     useEffect(() => {
@@ -149,6 +162,20 @@ export const Mapa = ({navigation}:any) => {
             }
         })
     }
+
+    const PosicionarDependenciaRuta =async () => {
+        if(setSeguirUsuario)
+            setSeguirUsuario(false)
+        if(Dependencia){
+            mapRef.current?.animateCamera({
+                center:{
+                    latitude: Dependencia.latitud,
+                    longitude: Dependencia.longitud
+                }
+            })
+        }
+    }
+
     const PosicionarBusquedaSugerida = async(busqueda: string) => {
         BuscarDependenciaSugerida(busqueda);
         DependenciasSugerida.map(elemento => {
@@ -198,6 +225,14 @@ export const Mapa = ({navigation}:any) => {
         setDestino({LocalizacionDestino:{latitude: 0, longitude: 0}});
     }
 
+    const MensajeLlegada = (Distancia: number) => {
+        if(Distancia <= 0.001){
+            Alert.alert('Llegaste a',Dependencia?.nombreDependencia,[
+                {text: 'Aceptar',onPress: () => CancelarRuta()}
+            ])
+        }
+    }
+
     const getTexto = ():string =>{
         return Texto;
     }
@@ -221,14 +256,25 @@ export const Mapa = ({navigation}:any) => {
         }
     }
 
+    const CalcularUltimoValor = (coordenadas:any[]) => {
+        let Lat: any = 'latitude'
+        let Long: any = 'longitude'
+        setUltimoValor({latitude: coordenadas[Lat],longitude: coordenadas[Long]})
+    }
+
     return (
         <>
             <MapView
+                provider={'google'}
                 style={{width:'100%', height:'100%'}}
                 showsMyLocationButton={false}
+                showsCompass={false}
                 showsUserLocation
                 toolbarEnabled={false}
+                scrollDuringRotateOrZoomEnabled={false}
                 rotateEnabled={false}
+                pitchEnabled={false}
+                customMapStyle={MapJSON}
                 initialRegion={{
                     latitude: PosicionInicial.latitud,
                     longitude: PosicionInicial.longitud,
@@ -237,8 +283,13 @@ export const Mapa = ({navigation}:any) => {
                 }}
                 ref={mapRef}
                 onTouchStart={ () => [setSeguirUsuario(false), setTocarDependencia(false), setEstadoBusqueda(false),Keyboard.dismiss()]}
-                maxZoomLevel={19}
+                maxZoomLevel={20}
                 minZoomLevel={17}
+                initialCamera={{center: {latitude: PosicionInicial.latitud, longitude: PosicionInicial.longitud},
+                heading: 300,
+                pitch: 0,
+                zoom: 17,
+                altitude: 2873}}
 
                 /* Permitira Calcular los puntos*/
                 onRegionChangeComplete={(cambio) => {setLongDelta(cambio.longitudeDelta)}}
@@ -262,7 +313,13 @@ export const Mapa = ({navigation}:any) => {
                         )
                     })
                 }
-                { Ruta && <MapViewDirections
+
+                { Ruta &&
+                    <Circle center={UltimoValor} radius={2.5} fillColor={'#43699C'} strokeColor={'black'} zIndex={99999} />
+                }
+
+                { Ruta && 
+                    <MapViewDirections
                         origin={Origen.LocalizacionUsuario}
                         destination={Destino.LocalizacionDestino}
                         apikey={GOOGLE_API_KEY}
@@ -272,10 +329,12 @@ export const Mapa = ({navigation}:any) => {
                         region='ec'
                         resetOnChange={false}
                         optimizeWaypoints={true}
-                        onReady={result => {
-                            Tiempo(result.duration, result.distance)
-                        }}
+                        precision='high'
                         
+                        onReady={result => { 
+                            if(UltimoValor.latitude === 0) {CalcularUltimoValor(result.coordinates[result.coordinates.length - 1])}
+                            Tiempo(result.duration, result.distance), MensajeLlegada(result.distance)
+                        }}
                     />
                 }
             </MapView>
@@ -286,6 +345,7 @@ export const Mapa = ({navigation}:any) => {
                         value={ getTexto()}
                         style={styles.InputBuscador}
                         onChangeText={busqueda => BusquedaSugerida(busqueda)}
+                        placeholderTextColor={'grey'}
                     />
                     <TouchableOpacity style={{height: 30,width: 30,position: 'absolute', right: DispositvoHeight * .01, top: DispositivoWidth * .01}} onPress={() => {if(getTexto()) {setTexto(''),setEstadoBusqueda(false)}}}>
                         <Icon name='close' color='grey' size={30} />
@@ -324,20 +384,30 @@ export const Mapa = ({navigation}:any) => {
                             <Text style={styles.Titulo}>{Dependencia?.nombreDependencia}</Text>
                             </View>
                         </Svg>
-                        <Fab NombreIcono="arrow-redo-outline" onPress={() => TrazarRuta()} Color='white' BGColor='#273E5C'
-                                style={{position: 'absolute',bottom: 20, right:10}}/>
-                        <Fab NombreIcono="information-outline" onPress={() => {navigation.navigate('Dependencias',{idDependencia:Dependencia!.idDependencia,idEstado:2})}} Color='white' BGColor='#273E5C'
+                        <Fab NombreIcono="arrow-redo-outline" onPress={() => TrazarRuta()} Color='white' BGColor='#273E5C' PLeft={0} IconSize={35}
+                                style={{position: 'absolute',bottom: 20, right:10}}/> 
+                        <Fab NombreIcono="information-outline" onPress={() => {navigation.navigate('Dependencias',{idDependencia:Dependencia!.idDependencia,idEstado:2})}} Color='white' BGColor='#273E5C' PLeft={0} IconSize={35}
                                 style={{position: 'absolute',bottom: 20, right: 70}}/>
                     </View>
                     :<View/>
             }
-                <Fab   NombreIcono="locate" Color='grey' BGColor='white'
+                <Fab NombreIcono="locate" Color='#43699C' BGColor='white' PLeft={0} IconSize={43}
                     onPress={() => PosicionCentral()}
                     style={{
                         bottom: DispositvoHeight * .60,
                         right: -DispositivoWidth *.84 
                     }}
                 />
+
+                {Ruta && 
+                    <Fab NombreIcono="business" Color='#43699C' BGColor='white' PLeft={1.5} IconSize={30}
+                        onPress={() => PosicionarDependenciaRuta()}
+                        style={{
+                            bottom: DispositvoHeight * .75,
+                            right: -DispositivoWidth *.84 
+                        }}
+                    />
+                }
             { Ruta && <View style={styles.CuadroRuta}>
                 { (Dependencia?.fotos.length != 0)
                     ?<Image style={styles.ImagenRuta} source={{uri: `${BaseURL}/imagenes/${Dependencia?.fotos[0].nombreFoto}`}} resizeMode={'stretch'} />
@@ -351,7 +421,7 @@ export const Mapa = ({navigation}:any) => {
                             <Text style={styles.Texto}>Tiempo de Llegada: <Text style={{fontWeight:'normal'}}> {DistanciaTiempo.tiempo.toFixed(0)}.min</Text></Text>
                             <Text style={styles.Texto}>Km Aproximados: <Text style={{fontWeight: 'normal'}}>{DistanciaTiempo.distancia.toFixed(1)}.km</Text></Text>
                         </View>
-                        <Fab   NombreIcono="walk" Color={Forma === 'WALKING' ?'#35A800' :'grey'} BGColor='#EAECEE'
+                        <Fab NombreIcono="walk" PLeft={0} Color={Forma === 'WALKING' ?'#35A800' :'grey'} BGColor='#EAECEE' IconSize={35}
                             onPress={() => CambiarDeModo('WALKING')}
                             style={{
                                 position: 'absolute',
@@ -360,7 +430,7 @@ export const Mapa = ({navigation}:any) => {
                             }}
                         />
 
-                        <Fab   NombreIcono="car" Color={Forma === 'DRIVING' ?'#FF6347' :'grey'} BGColor='#EAECEE'
+                        <Fab NombreIcono="car" PLeft={0} Color={Forma === 'DRIVING' ?'#FF6347' :'grey'} BGColor='#EAECEE' IconSize={35}
                             onPress={() => CambiarDeModo('DRIVING')}
                             style={{
                                 position: 'absolute',

@@ -14,6 +14,7 @@
 		6172F2D35A4C3AA820D92908 /* libPods-DependenciasAPP.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6423831EA8574132BED9D8CC /* libPods-DependenciasAPP.a */; };
 		7EF68E3733C33B6898317E18 /* libPods-DependenciasAPP-DependenciasAPPTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABFE59519B596E51CEFDCCC0 /* libPods-DependenciasAPP-DependenciasAPPTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		9B404A1C28821EFA0067B9E3 /* Logo-LODES.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B404A1B28821EFA0067B9E3 /* Logo-LODES.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,7 @@
 		6423831EA8574132BED9D8CC /* libPods-DependenciasAPP.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DependenciasAPP.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C97AB639B58BBB4B15BBE30 /* Pods-DependenciasAPP-DependenciasAPPTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DependenciasAPP-DependenciasAPPTests.debug.xcconfig"; path = "Target Support Files/Pods-DependenciasAPP-DependenciasAPPTests/Pods-DependenciasAPP-DependenciasAPPTests.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = DependenciasAPP/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		9B404A1B28821EFA0067B9E3 /* Logo-LODES.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Logo-LODES.png"; sourceTree = "<group>"; };
 		9B810FD8286D064D006982D2 /* Entypo.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Entypo.ttf; path = "../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
 		9B810FD9286D064D006982D2 /* Zocial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Zocial.ttf; path = "../../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		9B810FDA286D064D006982D2 /* Ionicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Ionicons.ttf; path = "../../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 		13B07FAE1A68108700A75B9A /* DependenciasAPP */ = {
 			isa = PBXGroup;
 			children = (
+				9B404A1B28821EFA0067B9E3 /* Logo-LODES.png */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -290,6 +293,7 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				9B404A1C28821EFA0067B9E3 /* Logo-LODES.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

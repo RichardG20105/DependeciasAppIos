@@ -8,10 +8,12 @@ interface Props{
     NombreIcono: string;
     Color: ColorValue;
     BGColor: ColorValue;
+    PLeft: number;
+    IconSize:number;
     onPress: () => void;
     style?: StyleProp<ViewStyle>
 }
-export const Fab = ({ NombreIcono, Color, BGColor,onPress, style = {}}: Props) => {
+export const Fab = ({ NombreIcono, Color, BGColor, PLeft, IconSize, onPress, style = {}}: Props) => {
     return (
         <View style={{...style as any}}>
 
@@ -20,11 +22,13 @@ export const Fab = ({ NombreIcono, Color, BGColor,onPress, style = {}}: Props) =
                 onPress={onPress}
                 style={[styles.boton,{backgroundColor: BGColor}]}
             >
-                <Icon
-                    name={NombreIcono}
-                    color={Color}
-                    size={35}
-                />
+                <View style={{left: PLeft}}>
+                    <Icon
+                        name={NombreIcono}
+                        color={Color}
+                        size={IconSize}
+                    />
+                </View>
             </TouchableOpacity>
         </View>
     )

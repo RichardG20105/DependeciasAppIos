@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PantallaMapa from '../paginas/PantallaMapa';
 import PantallaFavoritos from '../paginas/PantallaFavoritos';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,6 +8,8 @@ import PantallaUsuario from '../paginas/PantallaUsuario';
 import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import * as Animatable from 'react-native-animatable'
+import SplashScreen from 'react-native-splash-screen';
+import { DependenciaUso } from '../hooks/DependendeciasUso';
 
 const TabArr = [
   { label: 'Inicio', type: Icon, icon: 'home', route: 'Home', component: PantallaInicio},
@@ -103,7 +105,7 @@ const styles = StyleSheet.create({
   tabBar: {
     height: DimensionHeight * 0.07,
     position: 'absolute',
-    bottom: DimensionHeight * 0.03,
+    bottom: DimensionHeight * 0.04,
     right: 13,
     left: 13,
     borderRadius: 18,

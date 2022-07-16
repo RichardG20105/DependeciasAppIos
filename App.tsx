@@ -5,11 +5,13 @@ import Navegador from './src/navegador/Navegador';
 import { ProveedorPermisos } from './src/contexto/ContextoPermisos';
 import { ActivityIndicator, Image, LogBox, Text, View, StyleSheet, Dimensions } from 'react-native';
 import { ProovedorSesion } from './src/contexto/ContextoSesion';
+import { DependenciaUso } from './src/hooks/DependendeciasUso';
+import SplashScreen from 'react-native-splash-screen';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']);
 LogBox.ignoreAllLogs();
 
-const {width} = Dimensions.get('window')
+const {width,height} = Dimensions.get('window')
 const EstadoApp = ({ children}:any)=>{
   return (
       <ProveedorPermisos>
@@ -20,34 +22,36 @@ const EstadoApp = ({ children}:any)=>{
 
 const App = () => {
   const [EstadoCarga, setEstadoCarga] = useState(false)
-
-  useEffect(() => {
-    setEstadoCarga(true)
-  }, [])
+  const {Recomendados} = DependenciaUso()
   
   useEffect(() => {
     setTimeout(() =>{setEstadoCarga(false)},1500)
   }, [EstadoCarga])
+
+  useEffect(() => {
+    SplashScreen.hide()
+    setEstadoCarga(true)
+  }, [Recomendados])
   
   return (
     <NavigationContainer>
       <EstadoApp>
         <ProovedorSesion>
-      {!EstadoCarga && 
-
-          <Navegador />}
+          {!EstadoCarga &&  <Navegador />}
           { EstadoCarga && 
-    <View style ={{
-      top: 250
-    }}>
-    <Image style={{width: 100, height: 150, left:width*0.40, marginBottom: 10}} source={require('./src/assets/InicioSesion/LogoSesion.png')} resizeMode={'stretch'}/>
-    <Text style={style.TextoCarga}>LODES - ESPOCH</Text>
-  <ActivityIndicator
-  size={50}
-  color="#FF6347"
-  />
-</View>
-}
+            <View style={{height:height, backgroundColor: 'black'}}>
+              <View style ={{
+                top: 250
+              }}>
+              <Image style={{width: 100, height: 150, left:width*0.40, marginBottom: 10}} source={require('./src/assets/InicioSesion/LogoSesion.png')} resizeMode={'stretch'}/>
+              <Text style={style.TextoCarga}>LODES - ESPOCH</Text>
+              <ActivityIndicator
+                size={50}
+                color="#273E5C"
+              />
+              </View>
+            </View>
+          }
         </ProovedorSesion>
       </EstadoApp>
     </NavigationContainer>
