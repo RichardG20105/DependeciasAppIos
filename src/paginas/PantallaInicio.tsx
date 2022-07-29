@@ -121,28 +121,28 @@ const PantallaInicio = () => {
                     keyExtractor={item => `${item.idTipoDependencia}`}
                     renderItem = { ({item}) => {
                         return (
-                            <TouchableOpacity
+                                <View
                                 style={{
                                     padding: 7,
-                                    paddingBottom: 8,
-                                    backgroundColor: "#649DE8",
+                                    paddingBottom: 4 * 2,
+                                    backgroundColor: "#E6EEF9",
                                     borderRadius: 15,
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    marginRight: 6.5,
+                                    marginRight: 2, 
                                     
-                                    ...style.shadow
                                 }}
-                                onPress={() => {navigation.navigate('Lista',{idTipoDep: item.idTipoDependencia})}}
                             >
-                                <View   
+                                    <TouchableOpacity   
+                                    onPress={() => {navigation.navigate('Lista',{idTipoDep: item.idTipoDependencia})}}
                                     style={{
-                                        width: 50,
-                                        height: 48,
-                                        borderRadius: 25,
+                                        width: 70,
+                                        height: 70,
+                                        borderRadius: 23,
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        backgroundColor: "#FFFFFF"
+                                        backgroundColor: "#88C2FC",
+                                        ...style.shadow
                                     }}
                                 >
                                     <Image
@@ -153,23 +153,25 @@ const PantallaInicio = () => {
                                             height: 30
                                         }}
                                     />
+                                    </TouchableOpacity>
+                                    <Text
+                                        style={{
+                                            marginTop: 5,
+                                            color: "#295074",
+                                            fontFamily: "System", 
+                                            fontSize: 14, 
+                                            lineHeight: 22,
+                                            fontWeight: '700',
+                                            textAlign: 'justify'
+                                        }}
+                                    >
+                                        {item.nombreTipoDependencia}
+                                    </Text>
                                 </View>
-                                <Text
-                                    style={{
-                                        marginTop: 0,
-                                        color: "#FFFFFF",
-                                        fontFamily: "System", fontSize: 12, lineHeight: 22,
-                                        textAlign: 'justify'
-                                    }}
-                                >
-                                    {item.nombreTipoDependencia}
-                                </Text>
-                            </TouchableOpacity>
                         )
                     }}  
                     contentContainerStyle={{ paddingVertical: 4 }}
                 />
-
             </View>   
         )
     }

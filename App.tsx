@@ -31,24 +31,23 @@ const App = () => {
   useEffect(() => {
     SplashScreen.hide()
     setEstadoCarga(true)
-  }, [Recomendados])
+  }, [Recomendados.length > 0])
   
   return (
     <NavigationContainer>
       <EstadoApp>
         <ProovedorSesion>
           {!EstadoCarga &&  <Navegador />}
+          
           { EstadoCarga && 
-            <View style={{height:height, backgroundColor: 'black'}}>
-              <View style ={{
-                top: 250
-              }}>
-              <Image style={{width: 100, height: 150, left:width*0.40, marginBottom: 10}} source={require('./src/assets/InicioSesion/LogoSesion.png')} resizeMode={'stretch'}/>
-              <Text style={style.TextoCarga}>LODES - ESPOCH</Text>
-              <ActivityIndicator
-                size={50}
-                color="#273E5C"
-              />
+            <View style ={{height: height, backgroundColor: 'black'}}>
+              <View style={{top: width * 0.7,justifyContent: 'center', alignItems: 'center', alignContent: 'center'}}>
+                <Image style={{width: 100, height: 150, marginBottom: 10}} source={require('./src/assets/InicioSesion/LogoSesion.png')} resizeMode={'stretch'}/>
+                <Text style={style.TextoCarga}>LODES - ESPOCH</Text>
+                <ActivityIndicator
+                  size={50}
+                  color='#273E5C'
+                />
               </View>
             </View>
           }

@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Camera, Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { LocalizacionUso } from '../hooks/LocalizacionUso';
 import { Fab } from './Fab';
 import { DependenciaUso } from '../hooks/DependendeciasUso';
 import MapViewDirections, { MapViewDirectionsMode } from 'react-native-maps-directions';
 import { GOOGLE_API_KEY } from '../hooks/API_KEY';
-import { Dimensions, Image, Keyboard, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import {Svg} from 'react-native-svg';
 import {MapJSON, BaseURL} from '../api/Apis';
 import { FlatList, TextInput } from 'react-native-gesture-handler';
@@ -14,6 +13,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import IdleTimerManager from 'react-native-idle-timer';
+import { Alert, View, Image, Text, Keyboard, TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
 
 
 export const Mapa = ({navigation}:any) => {
@@ -32,14 +33,6 @@ export const Mapa = ({navigation}:any) => {
     const {top} = useSafeAreaInsets();
 
     let mapRef = useRef<MapView>(null)
-
-    const CameraInicial: Camera = {
-        center: {latitude: PosicionInicial.latitud, longitude: PosicionInicial.longitud},
-        heading: 100,
-        pitch: 0,
-        zoom: 18,
-        altitude: 2873,
-    }
     
     const [SeguirUsuario, setSeguirUsuario ]= useState<Boolean>(true);
 
@@ -184,10 +177,14 @@ export const Mapa = ({navigation}:any) => {
                 setTexto(busqueda);
                 mapRef.current?.animateCamera({
                     center:{latitude:elemento.latitud,longitude:elemento.longitud},
-                    zoom: 18,
+                    zoom: 19,
                 });
             }
         })
+    }
+
+    const PosicionarMapa = () => {
+        mapRef.current?.animateCamera({heading: 0})
     }
 
     const BusquedaSugerida = async(busqueda: string) => {
@@ -213,6 +210,7 @@ export const Mapa = ({navigation}:any) => {
         LocalizacionTiempoReal()
         setRuta(true)
         setTocarDependencia(false)
+        IdleTimerManager.setIdleTimerDisabled(true);
     }
 
     const Tiempo = (tiempo: number, distancia: number) => {
@@ -223,6 +221,7 @@ export const Mapa = ({navigation}:any) => {
         setRuta(false);
         setOrigen({LocalizacionUsuario:{latitude: 0, longitude: 0}});
         setDestino({LocalizacionDestino:{latitude: 0, longitude: 0}});
+        IdleTimerManager.setIdleTimerDisabled(false);
     }
 
     const MensajeLlegada = (Distancia: number) => {
@@ -238,16 +237,17 @@ export const Mapa = ({navigation}:any) => {
     }
 
     const MarcadorTam = () => {
-        const calculo =  0.1263 / LongDelta
-        const maximo = 37
-        if(calculo < maximo){
-            return calculo
-        }
-        return maximo
+        const MarcadorTamanio = ((-6666.67 * LongDelta) + 46.33)
+        if(MarcadorTamanio < 39)
+            return 39
+        return MarcadorTamanio
     }
 
     const LetraTam = () => {
-        return ((-160.77*LongDelta)+8.18)
+        const Letra = ((-3333.33 * LongDelta) + 12.67)
+        if(Letra < 9)
+            return 9
+        return Letra
     }
 
     const CambiarDeModo = (Modo: MapViewDirectionsMode) => {
@@ -272,7 +272,6 @@ export const Mapa = ({navigation}:any) => {
                 showsUserLocation
                 toolbarEnabled={false}
                 scrollDuringRotateOrZoomEnabled={false}
-                rotateEnabled={false}
                 pitchEnabled={false}
                 customMapStyle={MapJSON}
                 initialRegion={{
@@ -282,14 +281,9 @@ export const Mapa = ({navigation}:any) => {
                     longitudeDelta: 0.00421,
                 }}
                 ref={mapRef}
-                onTouchStart={ () => [setSeguirUsuario(false), setTocarDependencia(false), setEstadoBusqueda(false),Keyboard.dismiss()]}
-                maxZoomLevel={20}
-                minZoomLevel={17}
-                initialCamera={{center: {latitude: PosicionInicial.latitud, longitude: PosicionInicial.longitud},
-                heading: 300,
-                pitch: 0,
-                zoom: 17,
-                altitude: 2873}}
+                onTouchStart={ () => [setSeguirUsuario(false), setTocarDependencia(false), setEstadoBusqueda(false), Keyboard.dismiss()]}
+                maxZoomLevel={22}
+                minZoomLevel={19}
 
                 /* Permitira Calcular los puntos*/
                 onRegionChangeComplete={(cambio) => {setLongDelta(cambio.longitudeDelta)}}
@@ -306,9 +300,10 @@ export const Mapa = ({navigation}:any) => {
                                 onPress={() => !Ruta ?MarkerClic(val.idDependencia,val.latitud, val.longitud) :Alert.alert('Error','Para seleccionar una Dependencia debe cancelar la ruta primero',[{text: 'Aceptar'}])}
                                 style={{width: 75,height: 70,justifyContent: 'center'}}
                             >
-                                
-                                <Image source={ getIconoMapa(val.idTipoDependencia) } style={[styles.Marcador,{width: MarcadorTam(), height: MarcadorTam()}]} resizeMode='stretch' />
-                                <Text style={[styles.TextoMarcador,{color: getColorLetras(val.idTipoDependencia),marginTop: 5,fontSize: LetraTam(), width: 75, textAlign: 'center'}]} numberOfLines={2}>{val.nombreDependencia}</Text>
+                                <View style={{alignContent: 'center', alignItems: 'center'}}>
+                                    <Image source={ getIconoMapa(val.idTipoDependencia) } style={(TocarDependencia && val.idDependencia === Dependencia?.idDependencia) ?{width: MarcadorTam()+11, height: MarcadorTam()+11, zIndex: 9999} :{width: MarcadorTam(), height: MarcadorTam()}} resizeMode='contain'/>
+                                    <Text style={[styles.TextoMarcador,{color: getColorLetras(val.idTipoDependencia),marginTop: 5, width: 75, textAlign: 'center'},(TocarDependencia && val.idDependencia === Dependencia?.idDependencia) ?{fontSize: (LetraTam()-1), zIndex: 9999} :{fontSize:LetraTam()}]} numberOfLines={2}>{val.nombreDependencia}</Text>
+                                </View>
                             </Marker>
                         )
                     })
@@ -338,59 +333,71 @@ export const Mapa = ({navigation}:any) => {
                     />
                 }
             </MapView>
-            <View style={{...styles.BuscadorCuadro, marginTop: top}}>
-                <View style={styles.Buscador}>
-                    <TextInput 
-                        placeholder='Buscador...'
-                        value={ getTexto()}
-                        style={styles.InputBuscador}
-                        onChangeText={busqueda => BusquedaSugerida(busqueda)}
-                        placeholderTextColor={'grey'}
-                    />
-                    <TouchableOpacity style={{height: 30,width: 30,position: 'absolute', right: DispositvoHeight * .01, top: DispositivoWidth * .01}} onPress={() => {if(getTexto()) {setTexto(''),setEstadoBusqueda(false)}}}>
-                        <Icon name='close' color='grey' size={30} />
-                    </TouchableOpacity>
-                </View>
-                { EstadoBusqueda && <FlatList
-                        style={styles.ListaSugerida} 
-                        data={DependenciasSugerida} 
-                        getItemLayout={(data, index) => {
-                            return{
-                                length: 30,
-                                offset: 30 * index,
-                                index
-                            }
-                        }}
-                        renderItem={({item}) => {
-                        return(
-                            <TouchableOpacity style={styles.ListaTocar}
-                                onPress={() => {setSeguirUsuario(false), PosicionarBusquedaSugerida(item.nombreDependencia), MarkerClic(item.idDependencia,item.latitud, item.longitud)}}
-                            >
-                                <Text style={styles.TextoLista} numberOfLines={1}>{item.nombreDependencia}</Text>
+            { !Ruta &&
+                <View style={{...styles.BuscadorCuadro, marginTop: top}}>
+                    <View style={styles.Buscador}>
+                        <TextInput 
+                            placeholder='Buscador...'
+                            value={ getTexto()}
+                            style={styles.InputBuscador}
+                            onChangeText={busqueda => BusquedaSugerida(busqueda)}
+                            placeholderTextColor={'grey'}
+                        />
+                        {(getTexto() !== '') &&
+                            <TouchableOpacity style={{height: 30,width: 30,position: 'absolute', right: 10, top: 9}} onPress={() => {setTexto(''),setEstadoBusqueda(false)}}>
+                                <Icon name='close' color='grey' size={30} />
                             </TouchableOpacity>
-                        )
-                        }} 
-                    />
-                }
-            </View>
-            { TocarDependencia 
-                ?<View style={styles.Carta}>
-                        <Svg>
-                            { (Dependencia?.fotos.length != 0)
-                                ?<Image style={styles.CartaContenido} source={{uri: `${BaseURL}/imagenes/${Dependencia?.fotos[0].nombreFoto}`}}/>
-                                :<Image style={styles.CartaContenido} source={require('../assets/ImageNotFound.png')}/>
-                            }
-                            <View style={styles.Info}>
-                            <Text style={styles.Titulo}>{Dependencia?.nombreDependencia}</Text>
-                            </View>
-                        </Svg>
-                        <Fab NombreIcono="arrow-redo-outline" onPress={() => TrazarRuta()} Color='white' BGColor='#273E5C' PLeft={0} IconSize={35}
-                                style={{position: 'absolute',bottom: 20, right:10}}/> 
-                        <Fab NombreIcono="information-outline" onPress={() => {navigation.navigate('Dependencias',{idDependencia:Dependencia!.idDependencia,idEstado:2})}} Color='white' BGColor='#273E5C' PLeft={0} IconSize={35}
-                                style={{position: 'absolute',bottom: 20, right: 70}}/>
+                        }
                     </View>
-                    :<View/>
+                    { EstadoBusqueda && <FlatList
+                            style={styles.ListaSugerida} 
+                            data={DependenciasSugerida} 
+                            getItemLayout={(data, index) => {
+                                return{
+                                    length: 30,
+                                    offset: 30 * index,
+                                    index
+                                }
+                            }}
+                            renderItem={({item}) => {
+                            return(
+                                <TouchableOpacity style={styles.ListaTocar}
+                                    onPress={() => {setSeguirUsuario(false), PosicionarBusquedaSugerida(item.nombreDependencia), MarkerClic(item.idDependencia,item.latitud, item.longitud)}}
+                                >
+                                    <Text style={styles.TextoLista} numberOfLines={1}>{item.nombreDependencia}</Text>
+                                </TouchableOpacity>
+                            )
+                            }} 
+                        />
+                    }
+                </View>
             }
+
+            { TocarDependencia &&
+                <View style={styles.Carta}>
+                    <Svg>
+                        { (Dependencia?.fotos.length != 0)
+                            ?<Image style={styles.CartaContenido} source={{uri: `${BaseURL}/imagenes/${Dependencia?.fotos[0].nombreFoto}`}}/>
+                            :<Image style={styles.CartaContenido} source={require('../assets/ImageNotFound.png')}/>
+                        }
+                        <View style={styles.Info}>
+                        <Text style={styles.Titulo}>{Dependencia?.nombreDependencia}</Text>
+                        </View>
+                    </Svg>
+                    <Fab NombreIcono="arrow-redo-outline" PLeft={0} onPress={() => TrazarRuta()} Color='white' BGColor='#273E5C' IconSize={35}
+                            style={{position: 'absolute',bottom: 20, right:10}}/>
+                    <Fab NombreIcono="information-outline" PLeft={0} onPress={() => {navigation.navigate('Dependencias',{idDependencia:Dependencia!.idDependencia,idEstado:2})}} Color='white' BGColor='#273E5C' IconSize={35}
+                            style={{position: 'absolute',bottom: 20, right: 70}}/>
+                </View>
+            }
+
+            <Fab NombreIcono="compass-outline" Color='#43699C' BGColor='white' PLeft={2} IconSize={43}
+                onPress={() => PosicionarMapa()}
+                style={{
+                    bottom: DispositvoHeight * .90,
+                    right: -DispositivoWidth *.84 
+                }}
+            />
                 <Fab NombreIcono="locate" Color='#43699C' BGColor='white' PLeft={0} IconSize={43}
                     onPress={() => PosicionCentral()}
                     style={{
