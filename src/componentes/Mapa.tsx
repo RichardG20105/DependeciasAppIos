@@ -298,11 +298,14 @@ export const Mapa = ({navigation}:any) => {
                                     longitude:val.longitud
                                 }}
                                 onPress={() => !Ruta ?MarkerClic(val.idDependencia,val.latitud, val.longitud) :Alert.alert('Error','Para seleccionar una Dependencia debe cancelar la ruta primero',[{text: 'Aceptar'}])}
-                                style={{width: 75,height: 70,justifyContent: 'center'}}
                             >
-                                <View style={{alignContent: 'center', alignItems: 'center'}}>
-                                    <Image source={ getIconoMapa(val.idTipoDependencia) } style={(TocarDependencia && val.idDependencia === Dependencia?.idDependencia) ?{width: MarcadorTam()+11, height: MarcadorTam()+11, zIndex: 9999} :{width: MarcadorTam(), height: MarcadorTam()}} resizeMode='contain'/>
-                                    <Text style={[styles.TextoMarcador,{color: getColorLetras(val.idTipoDependencia),marginTop: 5, width: 75, textAlign: 'center'},(TocarDependencia && val.idDependencia === Dependencia?.idDependencia) ?{fontSize: (LetraTam()-1), zIndex: 9999} :{fontSize:LetraTam()}]} numberOfLines={2}>{val.nombreDependencia}</Text>
+                                <View style={{flexDirection: 'column-reverse'}}>
+                                    <View style={{alignContent: 'center', alignItems: 'center', margin: 5}}>
+                                        <Image source={ getIconoMapa(val.idTipoDependencia) } style={(TocarDependencia && val.idDependencia === Dependencia?.idDependencia) ?{width: MarcadorTam()+6, height: MarcadorTam()+6, zIndex: 9999} :{width: MarcadorTam(), height: MarcadorTam()}} resizeMode='contain'/> 
+                                    </View>
+                                    <View style={{alignContent: 'center', alignItems: 'center'}}>
+                                        <Text style={[styles.TextoMarcador,{color: getColorLetras(val.idTipoDependencia),marginTop: 5, width: 75, textAlign: 'center',fontSize:LetraTam()}]} numberOfLines={3}>{val.nombreDependencia}</Text>
+                                    </View>
                                 </View>
                             </Marker>
                         )
@@ -344,7 +347,7 @@ export const Mapa = ({navigation}:any) => {
                             placeholderTextColor={'grey'}
                         />
                         {(getTexto() !== '') &&
-                            <TouchableOpacity style={{height: 30,width: 30,position: 'absolute', right: 10, top: 9}} onPress={() => {setTexto(''),setEstadoBusqueda(false)}}>
+                            <TouchableOpacity style={{height: 30,width: 30,position: 'absolute', right: 10, top: 5}} onPress={() => {setTexto(''),setEstadoBusqueda(false)}}>
                                 <Icon name='close' color='grey' size={30} />
                             </TouchableOpacity>
                         }
@@ -394,7 +397,7 @@ export const Mapa = ({navigation}:any) => {
             <Fab NombreIcono="compass-outline" Color='#43699C' BGColor='white' PLeft={2} IconSize={43}
                 onPress={() => PosicionarMapa()}
                 style={{
-                    bottom: DispositvoHeight * .90,
+                    bottom: DispositvoHeight * .86,
                     right: -DispositivoWidth *.84 
                 }}
             />
